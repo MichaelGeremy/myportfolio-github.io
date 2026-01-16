@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M-Pesa Business Advisor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Onboarding Modal -->
+        <div id="onboarding-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Welcome to M-Pesa Business Advisor</h2>
+                <p>Let's personalize your experience</p>
+
+                <div class="form-group">
+                    <label>What type of business do you run?</label>
+                    <div class="business-type-grid">
+                        <button class="business-type-btn" data-type="retail">
+                            <span class="icon">🏪</span>
+                            <span class="label">Retail/Kiosk</span>
+                            <span class="desc">High volume, daily sales</span>
+                        </button>
+                        <button class="business-type-btn" data-type="distributor">
+                            <span class="icon">📦</span>
+                            <span class="label">Distributor</span>
+                            <span class="desc">Bulk sales, credit terms</span>
+                        </button>
+                        <button class="business-type-btn" data-type="services">
+                            <span class="icon">🔧</span>
+                            <span class="label">Services</span>
+                            <span class="desc">Project-based work</span>
+                        </button>
+                        <button class="business-type-btn" data-type="online">
+                            <span class="icon">💻</span>
+                            <span class="label">Online/Digital</span>
+                            <span class="desc">Subscriptions, digital products</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Monthly revenue target (optional)</label>
+                    <input type="number" id="revenue-target" placeholder="e.g., 100000">
+                </div>
+
+                <button class="btn-primary" id="save-onboarding">Continue</button>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <span class="icon">📊</span>
+                <h1>M-Pesa Business Advisor</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn-secondary" id="settings-btn">⚙️ Settings</button>
+            </div>
+        </header>
+
+        <!-- Upload Section -->
+        <section id="upload-section" class="upload-zone">
+            <div class="drop-area" id="drop-area">
+                <div class="icon-large">📄</div>
+                <h2>Upload Your M-Pesa Statement</h2>
+                <p>Drag & drop your PDF or click to browse</p>
+                <input type="file" id="file-input" accept="application/pdf" hidden>
+                <div class="button-group">
+                    <button class="btn-primary" onclick="document.getElementById('file-input').click()">
+                        Select Statement
+                    </button>
+                    <button class="btn-secondary" id="demo-btn">Try Demo</button>
+                </div>
+            </div>
+            <div id="error-display" class="error-box hidden"></div>
+            <p class="privacy-note">🔒 100% Private - Your data never leaves your device</p>
+        </section>
+
+        <!-- Loading -->
+        <div id="loading" class="hidden">
+            <div class="spinner"></div>
+            <p>Analyzing your business...</p>
+        </div>
+
+        <!-- Dashboard -->
+        <main id="dashboard" class="hidden">
+            <!-- Date Filter -->
+            <div class="date-filter">
+                <button class="filter-btn active" data-period="30">Last 30 Days</button>
+                <button class="filter-btn" data-period="90">Last 90 Days</button>
+                <button class="filter-btn" data-period="all">All Time</button>
+            </div>
+
+            <!-- Health Score Section -->
+            <section class="health-score-section">
+                <div class="health-header">
+                    <h2>Business Health Score</h2>
+                    <div class="overall-score">
+                        <div class="score-circle" id="overall-score-circle">
+                            <span class="score-value" id="overall-score">--</span>
+                            <span class="score-label">Overall</span>
+                        </div>
+                        <div class="score-status" id="score-status">Calculating...</div>
+                    </div>
+                </div>
+
+                <div class="health-dimensions">
+                    <div class="dimension-card" id="profitability-card">
+                        <div class="dimension-header">
+                            <span class="dimension-icon">💰</span>
+                            <span class="dimension-name">Profitability</span>
+                            <span class="dimension-score" id="profitability-score">--</span>
+                        </div>
+                        <div class="dimension-status" id="profitability-status">--</div>
+                        <div class="dimension-insight" id="profitability-insight">--</div>
+                    </div>
+
+                    <div class="dimension-card" id="efficiency-card">
+                        <div class="dimension-header">
+                            <span class="dimension-icon">⚡</span>
+                            <span class="dimension-name">Efficiency</span>
+                            <span class="dimension-score" id="efficiency-score">--</span>
+                        </div>
+                        <div class="dimension-status" id="efficiency-status">--</div>
+                        <div class="dimension-insight" id="efficiency-insight">--</div>
+                    </div>
+
+                    <div class="dimension-card" id="cashflow-card">
+                        <div class="dimension-header">
+                            <span class="dimension-icon">💵</span>
+                            <span class="dimension-name">Cash Flow</span>
+                            <span class="dimension-score" id="cashflow-score">--</span>
+                        </div>
+                        <div class="dimension-status" id="cashflow-status">--</div>
+                        <div class="dimension-insight" id="cashflow-insight">--</div>
+                    </div>
+
+                    <div class="dimension-card" id="growth-card">
+                        <div class="dimension-header">
+                            <span class="dimension-icon">📈</span>
+                            <span class="dimension-name">Growth</span>
+                            <span class="dimension-score" id="growth-score">--</span>
+                        </div>
+                        <div class="dimension-status" id="growth-status">--</div>
+                        <div class="dimension-insight" id="growth-insight">--</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Top Recommendations -->
+            <section class="recommendations-section">
+                <h2>💡 Top Recommendations</h2>
+                <div id="recommendations-list" class="recommendations-list">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Key Metrics -->
+            <section class="metrics-section">
+                <div class="metric-card">
+                    <h3>Revenue</h3>
+                    <p class="metric-value positive" id="total-revenue">KES 0</p>
+                    <p class="metric-change" id="revenue-change">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Expenses</h3>
+                    <p class="metric-value negative" id="total-expenses">KES 0</p>
+                    <p class="metric-change" id="expenses-change">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Net Profit</h3>
+                    <p class="metric-value" id="net-profit">KES 0</p>
+                    <p class="metric-change" id="profit-margin">0% margin</p>
+                </div>
+                <div class="metric-card highlight">
+                    <h3>Loan Eligibility</h3>
+                    <p class="metric-value" id="loan-limit">KES 0</p>
+                    <p class="metric-change">Based on revenue</p>
+                </div>
+            </section>
+
+            <!-- Charts -->
+            <section class="charts-section">
+                <div class="chart-card wide">
+                    <h3>Cash Flow Trend</h3>
+                    <canvas id="cashflowChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Expense Breakdown</h3>
+                    <canvas id="expenseChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Insights -->
+            <section class="insights-section">
+                <div class="insight-card">
+                    <h3>🏆 Top Customers</h3>
+                    <ul id="top-customers-list"></ul>
+                </div>
+                <div class="insight-card">
+                    <h3>💸 Top Expenses</h3>
+                    <ul id="top-expenses-list"></ul>
+                </div>
+                <div class="insight-card">
+                    <h3>⚠️ Anomalies</h3>
+                    <ul id="anomalies-list"></ul>
+                </div>
+            </section>
+
+            <button class="btn-secondary" onclick="location.reload()">Analyze Another Statement</button>
+        </main>
+    </div>
+
+    <script src="analyzer.js"></script>
+    <script src="recommendations.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
